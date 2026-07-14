@@ -4,110 +4,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đang kết nối EMR...</title>
+
+<title>EMR</title>
 
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f5f7fa;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 
-#loading,
-#error {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+body{
+    height:100vh;
+    background:linear-gradient(135deg,#1976d2,#42a5f5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
 }
 
-#error {
-    display: none;
+.card{
+    width:90%;
+    max-width:420px;
+    background:#fff;
+    border-radius:24px;
+    box-shadow:0 15px 40px rgba(0,0,0,.18);
+    padding:40px 30px;
+    text-align:center;
+    animation:show .4s ease;
 }
 
-#loading h1 {
-    font-size: 42px;
-    color: #0d6efd;
-    margin-bottom: 20px;
+.logo{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#1976d2;
+    color:#fff;
+    font-size:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
 }
 
-#loading p {
-    font-size: 22px;
-    color: #666;
+h1{
+    margin-top:22px;
+    font-size:28px;
+    color:#222;
 }
 
-#error h1 {
-    font-size: 52px;
-    color: #dc3545;
-    margin-bottom: 20px;
+p{
+    margin-top:12px;
+    font-size:17px;
+    color:#666;
+    line-height:1.6;
 }
 
-#error p {
-    font-size: 28px;
-    color: #333;
-    line-height: 1.6;
-    margin-bottom: 35px;
+.loader{
+    margin:28px auto 0;
+    width:52px;
+    height:52px;
+    border:5px solid #e5e5e5;
+    border-top:5px solid #1976d2;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
 }
 
-button {
-    font-size: 24px;
-    padding: 15px 35px;
-    border: none;
-    border-radius: 8px;
-    background: #0d6efd;
-    color: #fff;
-    cursor: pointer;
+#error{
+    display:none;
 }
 
-button:hover {
-    background: #0b5ed7;
+.error-icon{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#ffebee;
+    color:#e53935;
+    font-size:48px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:auto;
+}
+
+button{
+    margin-top:30px;
+    width:100%;
+    border:none;
+    background:#1976d2;
+    color:#fff;
+    font-size:18px;
+    padding:16px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes show{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="loading">
-    <h1>🔄 Đang kết nối hệ thống EMR...</h1>
-    <p>Vui lòng chờ trong giây lát...</p>
-</div>
+<div class="card">
 
-<div id="error">
-    <h1>⚠ KHÔNG KẾT NỐI ĐƯỢC</h1>
-    <p>
-        Vui lòng kết nối <b>WiFi nội bộ của bệnh viện</b><br>
-        rồi thử lại.
-    </p>
+    <div id="loading">
 
-    <button onclick="location.reload()">
-        Thử lại
-    </button>
+        <div class="logo">🏥</div>
+
+        <h1>Đang kết nối EMR</h1>
+
+        <p>
+            Hệ thống đang tự động tìm máy chủ phù hợp...
+        </p>
+
+        <div class="loader"></div>
+
+    </div>
+
+    <div id="error">
+
+        <div class="error-icon">📶</div>
+
+        <h1>Không kết nối được</h1>
+
+        <p>
+            Không tìm thấy máy chủ EMR.<br><br>
+            Vui lòng kết nối <b>WiFi nội bộ bệnh viện</b> rồi thử lại.
+        </p>
+
+        <button onclick="location.reload()">
+            🔄 Thử lại
+        </button>
+
+    </div>
+
 </div>
 
 <script>
-// Thử mở EMR WiFi A
-window.location.href = "http://172.16.100.254/emr";
 
-// Sau 1.5 giây nếu vẫn ở đây thì thử WiFi B
-setTimeout(() => {
-    if (document.visibilityState === "visible") {
-        window.location.href = "http://172.16.140.254/emr";
-    }
-}, 1500);
+// Thử WiFi A
+window.location.href="http://172.16.100.254/emr";
 
-// Sau 3 giây vẫn chưa chuyển được thì báo lỗi
-setTimeout(() => {
-    if (document.visibilityState === "visible") {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error").style.display = "flex";
+// Sau 1.5 giây thử WiFi B
+setTimeout(()=>{
+    if(document.visibilityState==="visible"){
+        window.location.href="http://172.16.140.254/emr";
     }
-}, 3000);
+},1500);
+
+// Sau 3 giây hiện lỗi
+setTimeout(()=>{
+    if(document.visibilityState==="visible"){
+        document.getElementById("loading").style.display="none";
+        document.getElementById("error").style.display="block";
+    }
+},3000);
+
 </script>
 
 </body>
