@@ -5,26 +5,42 @@
 <title>Đang kết nối EMR...</title>
 </head>
 <body>
-<h3>Đang tìm máy chủ EMR...</h3>
+<h3 id="status">Đang tìm máy chủ EMR...</h3>
 
 <script>
-function open100() {
-    location.href = "http://172.16.100.254/emr";
+let redirected = false;
+
+function redirect(url) {
+    if (redirected) return;
+    redirected = true;
+    window.location.href = url;
 }
 
-function open140() {
-    location.href = "http://172.16.140.254/emr";
-}
+// Thử mở WiFi A
+window.location.href = "http://172.16.100.254/emr";
 
-// Thử mở 100 trước
-open100();
-
-// Sau 2 giây nếu người dùng vẫn ở trang GitHub thì chuyển sang 140
+// Sau 2 giây nếu vẫn còn ở đây thì thử WiFi B
 setTimeout(() => {
-    if (document.visibilityState === "visible") {
-        open140();
+    if (!redirected && document.visibilityState === "visible") {
+        window.location.href = "http://172.16.140.254/emr";
     }
 }, 2000);
+
+// Sau 5 giây nếu vẫn chưa rời khỏi trang thì báo lỗi
+setTimeout(() => {
+    if (document.visibilityState === "visible") {
+        document.body.innerHTML = `
+            <div style="text-align:center;padding:30px;font-family:Arial">
+                <h2>⚠ Không kết nối được hệ thống EMR</h2>
+                <p>Vui lòng kết nối <b>WiFi nội bộ của bệnh viện</b> rồi thử lại.</p>
+                <button onclick="location.reload()"
+                        style="padding:10px 20px;font-size:16px">
+                    Thử lại
+                </button>
+            </div>
+        `;
+    }
+}, 5000);
 </script>
 
 </body>
