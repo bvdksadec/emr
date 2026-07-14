@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Đang kết nối EMR...</title>
+</head>
+<body>
+<h3>Đang tìm máy chủ EMR...</h3>
+
+<script>
+function open100() {
+    location.href = "http://172.16.100.254/emr";
+}
+
+function open140() {
+    location.href = "http://172.16.140.254/emr";
+}
+
+// Thử mở 100 trước
+open100();
+
+// Sau 2 giây nếu người dùng vẫn ở trang GitHub thì chuyển sang 140
+setTimeout(() => {
+    if (document.visibilityState === "visible") {
+        open140();
+    }
+}, 2000);
+</script>
+
+</body>
+</html>
