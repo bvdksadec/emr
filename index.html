@@ -1,47 +1,115 @@
+```html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đang kết nối EMR...</title>
-</head>
-<body>
-<h3 id="status">Đang tìm máy chủ EMR...</h3>
 
-<script>
-let redirected = false;
-
-function redirect(url) {
-    if (redirected) return;
-    redirected = true;
-    window.location.href = url;
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
 }
 
-// Thử mở WiFi A
+#loading,
+#error {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#error {
+    display: none;
+}
+
+#loading h1 {
+    font-size: 42px;
+    color: #0d6efd;
+    margin-bottom: 20px;
+}
+
+#loading p {
+    font-size: 22px;
+    color: #666;
+}
+
+#error h1 {
+    font-size: 52px;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+#error p {
+    font-size: 28px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+button {
+    font-size: 24px;
+    padding: 15px 35px;
+    border: none;
+    border-radius: 8px;
+    background: #0d6efd;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0b5ed7;
+}
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+    <h1>🔄 Đang kết nối hệ thống EMR...</h1>
+    <p>Vui lòng chờ trong giây lát...</p>
+</div>
+
+<div id="error">
+    <h1>⚠ KHÔNG KẾT NỐI ĐƯỢC</h1>
+    <p>
+        Vui lòng kết nối <b>WiFi nội bộ của bệnh viện</b><br>
+        rồi thử lại.
+    </p>
+
+    <button onclick="location.reload()">
+        Thử lại
+    </button>
+</div>
+
+<script>
+// Thử mở EMR WiFi A
 window.location.href = "http://172.16.100.254/emr";
 
-// Sau 2 giây nếu vẫn còn ở đây thì thử WiFi B
-setTimeout(() => {
-    if (!redirected && document.visibilityState === "visible") {
-        window.location.href = "http://172.16.140.254/emr";
-    }
-}, 2000);
-
-// Sau 5 giây nếu vẫn chưa rời khỏi trang thì báo lỗi
+// Sau 1.5 giây nếu vẫn ở đây thì thử WiFi B
 setTimeout(() => {
     if (document.visibilityState === "visible") {
-        document.body.innerHTML = `
-            <div style="text-align:center;padding:30px;font-family:Arial">
-                <h2>⚠ Không kết nối được hệ thống EMR</h2>
-                <p>Vui lòng kết nối <b>WiFi nội bộ của bệnh viện</b> rồi thử lại.</p>
-                <button onclick="location.reload()"
-                        style="padding:10px 20px;font-size:16px">
-                    Thử lại
-                </button>
-            </div>
-        `;
+        window.location.href = "http://172.16.140.254/emr";
     }
-}, 5000);
+}, 1500);
+
+// Sau 3 giây vẫn chưa chuyển được thì báo lỗi
+setTimeout(() => {
+    if (document.visibilityState === "visible") {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("error").style.display = "flex";
+    }
+}, 3000);
 </script>
 
 </body>
 </html>
+```
