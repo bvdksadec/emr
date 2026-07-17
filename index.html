@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>EMR</title>
 
 <style>
@@ -19,6 +20,7 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
+    overflow:hidden;
 }
 
 .card{
@@ -29,6 +31,7 @@ body{
     box-shadow:0 15px 40px rgba(0,0,0,.18);
     padding:40px 30px;
     text-align:center;
+    animation:show .4s ease;
 }
 
 .logo{
@@ -37,7 +40,7 @@ body{
     border-radius:50%;
     background:#1976d2;
     color:#fff;
-    font-size:40px;
+    font-size:42px;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -50,7 +53,7 @@ body{
     border-radius:50%;
     background:#ffebee;
     color:#e53935;
-    font-size:48px;
+    font-size:46px;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -59,18 +62,20 @@ body{
 
 h1{
     margin-top:22px;
+    font-size:28px;
     color:#222;
 }
 
 p{
-    margin-top:12px;
+    margin-top:14px;
+    font-size:17px;
     color:#666;
-    line-height:1.6;
+    line-height:1.7;
 }
 
 .loader{
     display:none;
-    margin:25px auto;
+    margin:30px auto 0;
     width:52px;
     height:52px;
     border:5px solid #e5e5e5;
@@ -80,15 +85,20 @@ p{
 }
 
 button{
-    width:100%;
     margin-top:30px;
+    width:100%;
     border:none;
-    padding:16px;
-    border-radius:14px;
     background:#1976d2;
     color:#fff;
     font-size:18px;
+    padding:16px;
+    border-radius:14px;
     cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    background:#1565c0;
 }
 
 button:disabled{
@@ -96,55 +106,72 @@ button:disabled{
     cursor:not-allowed;
 }
 
+button:active{
+    transform:scale(.98);
+}
+
 #error{
     display:none;
 }
 
 @keyframes spin{
-    to{transform:rotate(360deg);}
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes show{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 </style>
-
 </head>
 
 <body>
 
 <div class="card">
 
-<div id="main">
+    <div id="main">
 
-<div class="logo">🏥</div>
+        <div class="logo">🏥</div>
 
-<h1>EMR</h1>
+        <h1>EMR</h1>
 
-<p>
-Nhấn nút bên dưới để kết nối hệ thống EMR.
-</p>
+        <p>
+            Nhấn nút bên dưới để kết nối vào hệ thống
+            hồ sơ bệnh án điện tử.
+        </p>
 
-<div class="loader" id="loader"></div>
+        <div class="loader" id="loader"></div>
 
-<button id="btnConnect" onclick="connectEMR()">
-🔗 Kết nối EMR
-</button>
+        <button id="btnConnect" onclick="connectEMR()">
+            🔗 Kết nối EMR
+        </button>
 
-</div>
+    </div>
 
-<div id="error">
+    <div id="error">
 
-<div class="error-icon">📶</div>
+        <div class="error-icon">📶</div>
 
-<h1>Không kết nối được</h1>
+        <h1>Không thể kết nối</h1>
 
-<p>
-Không tìm thấy máy chủ EMR.<br><br>
-Vui lòng kết nối <b>WiFi nội bộ bệnh viện</b> rồi thử lại.
-</p>
+        <p>
+            Vui lòng kết nối <b>WiFi nội bộ bệnh viện</b><br>
+            rồi nhấn <b>Thử lại</b>.
+        </p>
 
-<button onclick="location.reload()">
-🔄 Thử lại
-</button>
+        <button onclick="location.reload()">
+            🔄 Thử lại
+        </button>
 
-</div>
+    </div>
 
 </div>
 
@@ -156,13 +183,13 @@ function connectEMR(){
     const loader=document.getElementById("loader");
 
     btn.disabled=true;
-    btn.innerHTML="Đang kết nối...";
+    btn.innerHTML="⏳ Đang kết nối...";
     loader.style.display="block";
 
     // Thử WiFi 100
     window.location.href="http://172.16.100.254/emr";
 
-    // Sau 1.5 giây thử WiFi 140
+    // Nếu chưa chuyển được thì thử WiFi 140
     setTimeout(function(){
 
         if(document.visibilityState==="visible"){
@@ -171,7 +198,7 @@ function connectEMR(){
 
     },1500);
 
-    // Sau 3 giây báo lỗi
+    // Nếu vẫn ở trang này thì báo lỗi
     setTimeout(function(){
 
         if(document.visibilityState==="visible"){
