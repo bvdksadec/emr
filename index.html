@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <title>EMR</title>
 
@@ -181,21 +184,24 @@ button:active{
 
 function connectEMR(){
 
-    const btn=document.getElementById("btnConnect");
-    const loader=document.getElementById("loader");
+    const btn = document.getElementById("btnConnect");
+    const loader = document.getElementById("loader");
 
-    btn.disabled=true;
-    btn.innerHTML="⏳ Đang kết nối...";
-    loader.style.display="block";
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Đang kết nối...";
+    loader.style.display = "block";
+
+    // Xóa URL hiện tại khỏi history để hạn chế Safari giữ trạng thái
+    history.replaceState(null, "", location.pathname + "?t=" + Date.now());
 
     // Thử WiFi 100
-    window.location.href="http://172.16.100.254/emr";
+    location.replace("http://172.16.100.254/emr?t=" + Date.now());
 
     // Nếu chưa chuyển được thì thử WiFi 140
     setTimeout(function(){
 
-        if(document.visibilityState==="visible"){
-            window.location.href="http://172.16.140.254/emr";
+        if(document.visibilityState === "visible"){
+            location.replace("http://172.16.140.254/emr?t=" + Date.now());
         }
 
     },1500);
@@ -203,10 +209,10 @@ function connectEMR(){
     // Nếu vẫn ở trang này thì báo lỗi
     setTimeout(function(){
 
-        if(document.visibilityState==="visible"){
+        if(document.visibilityState === "visible"){
 
-            document.getElementById("main").style.display="none";
-            document.getElementById("error").style.display="block";
+            document.getElementById("main").style.display = "none";
+            document.getElementById("error").style.display = "block";
 
         }
 
