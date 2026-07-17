@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>EMR</title>
 
@@ -11,289 +11,199 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-family:Segoe UI,Roboto,Arial,sans-serif;
 }
 
 body{
     height:100vh;
-    background:linear-gradient(135deg,#1976d2,#42a5f5);
     display:flex;
     justify-content:center;
     align-items:center;
+    background:linear-gradient(135deg,#1565c0,#42a5f5);
 }
 
 .card{
-    width:90%;
-    max-width:420px;
+    width:95%;
+    max-width:430px;
     background:#fff;
     border-radius:24px;
-    box-shadow:0 15px 40px rgba(0,0,0,.18);
-    padding:40px 30px;
+    padding:35px;
     text-align:center;
-    animation:show .4s ease;
+    box-shadow:0 20px 50px rgba(0,0,0,.18);
 }
 
 .logo{
     width:90px;
     height:90px;
+    margin:auto;
     border-radius:50%;
     background:#1976d2;
     color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     font-size:42px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin:auto;
-}
-
-.error-icon{
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    background:#ffebee;
-    color:#e53935;
-    font-size:48px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin:auto;
 }
 
 h1{
     margin-top:20px;
-    font-size:28px;
     color:#222;
+    font-size:28px;
 }
 
-p{
-    margin-top:12px;
+#status{
+    margin-top:15px;
     color:#666;
-    font-size:17px;
-    line-height:1.6;
+    line-height:1.7;
+    font-size:16px;
 }
 
 .loader{
-    margin:28px auto;
-    width:52px;
-    height:52px;
-    border:5px solid #e5e5e5;
+    width:55px;
+    height:55px;
+    border:5px solid #ddd;
     border-top:5px solid #1976d2;
     border-radius:50%;
+    margin:28px auto;
     animation:spin .8s linear infinite;
 }
 
 button{
     width:100%;
-    margin-top:28px;
+    padding:15px;
     border:none;
+    border-radius:12px;
     background:#1976d2;
     color:#fff;
     font-size:18px;
-    padding:16px;
-    border-radius:14px;
     cursor:pointer;
-    transition:.2s;
+    display:none;
 }
 
 button:hover{
     background:#1565c0;
 }
 
-button:active{
-    transform:scale(.98);
+.success{
+    color:#2e7d32;
+    font-weight:bold;
 }
 
-#ready,#error{
-    display:none;
+.error{
+    color:#d32f2f;
+    font-weight:bold;
 }
 
 @keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
-}
-
-@keyframes show{
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
+to{transform:rotate(360deg);}
 }
 </style>
-
 </head>
 <body>
 
 <div class="card">
 
-    <!-- Loading -->
-    <div id="loading">
+<div class="logo">🏥</div>
 
-        <div class="logo">🏥</div>
+<h1>EMR</h1>
 
-        <h1>Đang kiểm tra kết nối</h1>
+<div class="loader" id="loader"></div>
 
-        <p id="status">
-            Đang tìm máy chủ EMR...
-        </p>
+<div id="status">
+Đang kiểm tra kết nối...
+</div>
 
-        <div class="loader"></div>
-
-    </div>
-
-    <!-- Ready -->
-    <div id="ready">
-
-        <div class="logo">🏥</div>
-
-        <h1>Sẵn sàng</h1>
-
-        <p id="serverName">
-            Đã tìm thấy máy chủ.
-        </p>
-
-        <button id="connectBtn">
-            🚀 Kết nối EMR
-        </button>
-
-    </div>
-
-    <!-- Error -->
-    <div id="error">
-
-        <div class="error-icon">📶</div>
-
-        <h1>Không kết nối được</h1>
-
-        <p>
-            Không tìm thấy máy chủ EMR.<br><br>
-            Vui lòng kết nối WiFi nội bộ bệnh viện.
-        </p>
-
-        <button onclick="checkServer()">
-            🔄 Kiểm tra lại
-        </button>
-
-    </div>
+<button id="connectBtn">
+KẾT NỐI
+</button>
 
 </div>
 
 <script>
 
-let serverUrl = "";
+const SERVERS=[
+"http://172.16.100.254",
+"http://172.16.140.254"
+];
 
-function resetUI(){
+let currentServer="";
 
-    loading.style.display="block";
-    ready.style.display="none";
-    error.style.display="none";
+async function checkServer(server){
 
-}
+    try{
 
-function showReady(url,name){
+        const controller=new AbortController();
 
-    serverUrl=url;
+        const timeout=setTimeout(()=>{
+            controller.abort();
+        },1500);
 
-    loading.style.display="none";
-    ready.style.display="block";
+        const res=await fetch(server+"/emr/config.json",{
+            cache:"no-store",
+            signal:controller.signal
+        });
 
-    serverName.innerHTML="Đã kết nối tới <b>"+name+"</b>";
+        clearTimeout(timeout);
 
-}
+        return res.ok;
 
-function showError(){
-
-    loading.style.display="none";
-    error.style.display="block";
-
-}
-
-connectBtn.onclick=function(){
-
-    location.href=serverUrl;
-
-};
-
-function checkOne(url,name,next){
-
-    status.innerHTML="Đang kiểm tra "+name+"...";
-
-    let img=new Image();
-
-    let done=false;
-
-    let timer=setTimeout(function(){
-
-        if(done) return;
-
-        done=true;
-
-        next();
-
-    },1200);
-
-    img.onload=function(){
-
-        if(done) return;
-
-        done=true;
-
-        clearTimeout(timer);
-
-        showReady(url,name);
-
-    };
-
-    img.onerror=function(){
-
-        if(done) return;
-
-        done=true;
-
-        clearTimeout(timer);
-
-        next();
-
-    };
-
-    img.src=url+"/favicon.ico?"+Date.now();
+    }catch(e){
+        return false;
+    }
 
 }
 
-function checkServer(){
+async function start(){
 
-    resetUI();
+    const status=document.getElementById("status");
 
-    checkOne(
-        "http://172.16.100.254/emr",
-        "EMR - WiFi 100",
+    for(const server of SERVERS){
 
-        function(){
+        status.innerHTML="Đang kiểm tra<br><b>"+server+"</b>";
 
-            checkOne(
+        const ok=await checkServer(server);
 
-                "http://172.16.140.254/emr",
-                "EMR - WiFi 140",
+        if(ok){
 
-                function(){
+            currentServer=server;
 
-                    showError();
+            document.getElementById("loader").style.display="none";
 
-                }
+            status.innerHTML=
+            '<div class="success">✅ Đã tìm thấy máy chủ</div><br>'
+            +server;
 
-            );
+            const btn=document.getElementById("connectBtn");
 
+            btn.style.display="block";
+
+            btn.onclick=function(){
+                location.href=currentServer+"/emr";
+            };
+
+            return;
         }
 
-    );
+    }
+
+    document.getElementById("loader").style.display="none";
+
+    status.innerHTML=
+    '<div class="error">❌ Không tìm thấy máy chủ EMR</div><br>'
+    +'Vui lòng kết nối WiFi nội bộ rồi thử lại.';
+
+    const btn=document.getElementById("connectBtn");
+
+    btn.style.display="block";
+    btn.innerHTML="THỬ LẠI";
+
+    btn.onclick=function(){
+        location.reload();
+    };
 
 }
 
-checkServer();
+start();
 
 </script>
 
