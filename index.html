@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>EMR</title>
 
 <style>
@@ -23,29 +22,42 @@ body{
 }
 
 .card{
-    width:92%;
+    width:90%;
     max-width:420px;
     background:#fff;
     border-radius:24px;
-    padding:35px 30px;
-    text-align:center;
     box-shadow:0 15px 40px rgba(0,0,0,.18);
+    padding:40px 30px;
+    text-align:center;
 }
 
-.icon{
+.logo{
     width:90px;
     height:90px;
     border-radius:50%;
     background:#1976d2;
     color:#fff;
+    font-size:40px;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
     margin:auto;
-    font-size:42px;
 }
 
-h2{
+.error-icon{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#ffebee;
+    color:#e53935;
+    font-size:48px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:auto;
+}
+
+h1{
     margin-top:22px;
     color:#222;
 }
@@ -54,14 +66,14 @@ p{
     margin-top:12px;
     color:#666;
     line-height:1.6;
-    font-size:16px;
 }
 
 .loader{
-    width:54px;
-    height:54px;
-    margin:28px auto;
-    border:5px solid #eee;
+    display:none;
+    margin:25px auto;
+    width:52px;
+    height:52px;
+    border:5px solid #e5e5e5;
     border-top:5px solid #1976d2;
     border-radius:50%;
     animation:spin .8s linear infinite;
@@ -69,91 +81,67 @@ p{
 
 button{
     width:100%;
-    padding:15px;
+    margin-top:30px;
     border:none;
+    padding:16px;
     border-radius:14px;
     background:#1976d2;
     color:#fff;
     font-size:18px;
     cursor:pointer;
-    margin-top:25px;
 }
 
-button:hover{
-    background:#1565c0;
+button:disabled{
+    background:#90caf9;
+    cursor:not-allowed;
 }
 
-.success{
-    background:#43a047;
-}
-
-.success:hover{
-    background:#2e7d32;
-}
-
-.error{
-    background:#e53935;
-}
-
-.error:hover{
-    background:#c62828;
+#error{
+    display:none;
 }
 
 @keyframes spin{
-to{transform:rotate(360deg);}
-}
-
-.hidden{
-    display:none;
+    to{transform:rotate(360deg);}
 }
 </style>
 
 </head>
+
 <body>
 
 <div class="card">
 
-<div id="loading">
+<div id="main">
 
-<div class="icon">🏥</div>
+<div class="logo">🏥</div>
 
-<h2>Đang kiểm tra kết nối</h2>
-
-<p>Hệ thống đang tìm máy chủ EMR...</p>
-
-<div class="loader"></div>
-
-</div>
-
-<div id="success" class="hidden">
-
-<div class="icon" style="background:#43a047;">✔</div>
-
-<h2>Kết nối thành công</h2>
+<h1>EMR</h1>
 
 <p>
-Đã tìm thấy máy chủ EMR.<br>
-Nhấn nút bên dưới để mở hệ thống.
+Nhấn nút bên dưới để kết nối hệ thống EMR.
 </p>
 
-<button class="success" onclick="openEMR()">
-Kết nối EMR
+<div class="loader" id="loader"></div>
+
+<button id="btnConnect" onclick="connectEMR()">
+🔗 Kết nối EMR
 </button>
 
 </div>
 
-<div id="error" class="hidden">
+<div id="error">
 
-<div class="icon" style="background:#e53935;">📶</div>
+<div class="error-icon">📶</div>
 
-<h2>Không tìm thấy máy chủ</h2>
+<h1>Không kết nối được</h1>
 
 <p>
-Vui lòng kết nối WiFi nội bộ bệnh viện rồi thử lại.
+Không tìm thấy máy chủ EMR.<br><br>
+Vui lòng kết nối <b>WiFi nội bộ bệnh viện</b> rồi thử lại.
 </p>
 
-<button class="error" onclick="location.reload()">
-Thử lại
+<button onclick="location.reload()">
+🔄 Thử lại
 </button>
 
 </div>
@@ -162,63 +150,40 @@ Thử lại
 
 <script>
 
-let emrUrl = "";
+function connectEMR(){
 
-async function check(url){
+    const btn=document.getElementById("btnConnect");
+    const loader=document.getElementById("loader");
 
-    try{
+    btn.disabled=true;
+    btn.innerHTML="Đang kết nối...";
+    loader.style.display="block";
 
-        const controller = new AbortController();
+    // Thử WiFi 100
+    window.location.href="http://172.16.100.254/emr";
 
-        const timeout = setTimeout(()=>controller.abort(),1200);
+    // Sau 1.5 giây thử WiFi 140
+    setTimeout(function(){
 
-        const res = await fetch(url+"/config.json",{
-            cache:"no-store",
-            signal:controller.signal
-        });
-
-        clearTimeout(timeout);
-
-        if(res.ok){
-            emrUrl=url;
-            showSuccess();
-            return true;
+        if(document.visibilityState==="visible"){
+            window.location.href="http://172.16.140.254/emr";
         }
 
-    }catch(e){}
+    },1500);
 
-    return false;
-}
+    // Sau 3 giây báo lỗi
+    setTimeout(function(){
 
-function showSuccess(){
+        if(document.visibilityState==="visible"){
 
-    loading.classList.add("hidden");
-    success.classList.remove("hidden");
+            document.getElementById("main").style.display="none";
+            document.getElementById("error").style.display="block";
 
-}
+        }
 
-function showError(){
-
-    loading.classList.add("hidden");
-    error.classList.remove("hidden");
+    },3000);
 
 }
-
-function openEMR(){
-
-    location.href=emrUrl;
-
-}
-
-(async()=>{
-
-    if(await check("http://172.16.100.254/emr")) return;
-
-    if(await check("http://172.16.140.254/emr")) return;
-
-    showError();
-
-})();
 
 </script>
 
